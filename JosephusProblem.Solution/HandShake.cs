@@ -1,8 +1,11 @@
-﻿using JosephusProblem.CrossCuttingConcernCollection.Base;
+﻿using JosephusProblem.Core.Base;
+using JosephusProblem.CrossCuttingConcernCollection.Base;
 using JosephusProblem.CrossCuttingConcernCollection.Helper;
 using JosephusProblem.DependencyResolution;
 using JosephusProblem.Solution.Base;
 using System;
+using System.Diagnostics;
+using System.Numerics;
 
 namespace JosephusProblem.Solution
 {
@@ -10,44 +13,89 @@ namespace JosephusProblem.Solution
     {
         private readonly IMonitorable _monitor;
         private readonly ILog _logger;
+        private readonly IValidation _validation;
 
         public HandShake()
         {
             _logger = Injector.Resolve<ILog>();
             _monitor = Injector.Resolve<IMonitorable>();
+            _validation = Injector.Resolve<IValidation>();
         }
 
         /// <summary>
-        /// Handshake number can be found via factorial
+        /// Formula 2n!/((n+1)!*n!)
         /// </summary>
-        /// <param name="n"></param>
+        /// <param n=input></param>
         /// <returns></returns>
-        public int GetResult(params string[] arguments)
+        public ServiceResponse<BigInteger> GetResult(params string[] arguments)
         {
-            var validationResult = new Validation();
-            var response = validationResult.Check(arguments[0]);
-            var handShakeNumber = 1;
+            var watch = new Stopwatch(); 
+            watch.Start();
+              
+            var response = new ServiceResponse<BigInteger>();
+            var validationResult = _validation.Check(arguments[0]);
+            BigInteger handShakeNumber = 1;
 
-            if (response.IsSucceed)
+            if (validationResult.IsSucceed)
             {
-                var n = Convert.ToInt32(arguments[0]);
+                int input = Convert.ToInt32(arguments[0]);
 
-                if (!(n == 1 || n == 0))
+                try
                 {
-                    handShakeNumber = (2 * n * (2 * n - 1)) / 2;  
+                    handShakeNumber = GetHandshakeNumber(input);
+                    _monitor.Display("Result is " + handShakeNumber);
+                    _logger.Log("Result is " + handShakeNumber, LogType.Info);
+                    response.Data = handShakeNumber;
                 }
-                _monitor.Display("Result is " + handShakeNumber);
+                catch (Exception ex)
+                {
+                    response.Exception = ex;
+                    response.Message = "Exception occured. Details : " + ex;
+                    _logger.Log(response.Message, LogType.Error);
+                    _monitor.Display(response.Message);
+                }
             }
             else
             {
-                _monitor.Display(response.Message);
-                _logger.Log("Validation result is " + (response.IsSucceed ? "successful" : "unsuccessful") + ", " + response.Message, LogType.Error);
+                var message = "Validation result is unsuccessful. " + validationResult.Message;
+                _monitor.Display(message);
+                _logger.Log(message, LogType.Error);
             }
 
-            _logger.Log("Result is " + handShakeNumber, LogType.Info);
+            watch.Stop();
+            _monitor.Display("Calculation of handshakes totally took " + watch.Elapsed.TotalSeconds.ToString() + " seconds.");
 
-            return handShakeNumber;
+            return response;
 
         }
+
+        private BigInteger GetHandshakeNumber(int input)
+        { 
+            if (input == 1 || input == 0)
+            {
+                return 1;
+            } 
+
+            BigInteger division = GetFactorial(new BigInteger(2 * input));
+            BigInteger dividedBy1 = GetFactorial(new BigInteger(1 + input));
+            BigInteger dividedBy2 = GetFactorial(new BigInteger(input));
+            
+            BigInteger handshakeCount = division / (dividedBy1 * dividedBy2);//Catalan Equation Formula 
+
+            return handshakeCount;
+
+        }
+
+        private BigInteger GetFactorial(BigInteger number)
+        {
+            if (number == 1)
+            {
+                return 1;
+            }
+
+            return number * GetFactorial(number - 1);
+
+        }
+
     }
 }

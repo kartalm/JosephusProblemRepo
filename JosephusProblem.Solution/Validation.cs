@@ -1,14 +1,15 @@
 ﻿using JosephusProblem.Core.Base;
 using JosephusProblem.CrossCuttingConcernCollection.ExceptionHandling;
 using JosephusProblem.CrossCuttingConcernCollection.Helper;
+using JosephusProblem.Solution.Base;
 using System;
 using System.Linq;
 
 namespace JosephusProblem.Solution
 {
-    internal class Validation
+    public class Validation : IValidation
     {
-        internal ServiceResponse Check(string value)
+        public ServiceResponse Check(string value)
         {
             var response = new ServiceResponse();
             int number;
@@ -32,7 +33,7 @@ namespace JosephusProblem.Solution
                 response.Message = "Unable to convert to number. Please enter a number!";
                 response.Exception = exception;
             }
-            else if (Convert.ToInt32(value) > 500 || Convert.ToInt32(value) < 0)
+            else if (Convert.ToInt32(value) > 1000 || Convert.ToInt32(value) <= 0)
             {
                 exception.LogException("Value is not between 0 and 1000. Value : " + value);
                 response.Message = "Please enter a number between 0 and 1000!";
@@ -42,5 +43,6 @@ namespace JosephusProblem.Solution
             return response;
 
         }
+ 
     }
 }

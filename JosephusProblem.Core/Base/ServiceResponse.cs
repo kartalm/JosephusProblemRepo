@@ -13,7 +13,7 @@ namespace JosephusProblem.Core.Base
             }
         }
 
-        public AppException Exception { get; set; }
+        public Exception Exception { get; set; }
 
         public string Message { get; set; }
 

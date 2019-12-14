@@ -1,8 +1,11 @@
-﻿namespace JosephusProblem.Solution.Base
+﻿using JosephusProblem.Core.Base;
+using System.Numerics;
+
+namespace JosephusProblem.Solution.Base
 {
     public interface IJosephusProblem
     {
-        int GetResult(params string[] arguments);
+        ServiceResponse<BigInteger> GetResult(params string[] arguments);
 
     }
 }
