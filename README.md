@@ -1,4 +1,4 @@
-Question 
+Problem 
 
 Imagine an even number of people in a circle where each person has a fixed position. 
 What is the number of ways in which every person simultaneously shakes hands with one other 
